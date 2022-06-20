@@ -1,0 +1,10 @@
+make --dry-run --always-make --keep-going --print-directory
+make: Entering directory '/home/mb/Documentos/Monografia/Codes/project'
+gcc -c -o obj/peter.o src/peter.c -O1 -lm -g
+gcc -c -o obj/random.o src/random.c -O1 -lm -g
+gcc -c -o obj/observaveis.o src/observaveis.c -O1 -lm -g
+gcc -c -o obj/simples.o src/simples.c -O1 -lm -g
+gcc -c -o obj/main.o src/main.c -O1 -lm -g
+gcc -o peter obj/peter.o obj/random.o obj/observaveis.o obj/simples.o obj/main.o -O1 -lm -g
+make: Leaving directory '/home/mb/Documentos/Monografia/Codes/project'
+ 
