@@ -6,5 +6,6 @@ extern int randomInt(int min, int max);
 extern float generateGaussianNoise(float mu, float sigma);
 extern int geraIdade(int min, int max);
 extern float geraCompetencia(float min, float max);
+extern float delta();
 
 #endif // random_h__

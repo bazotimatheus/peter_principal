@@ -8,172 +8,175 @@
 #include "../lib/observaveis.h"
 
 /* Cria lista com n nos */
-struct lista *criaLista(int n) {
-	struct lista *ini, *ult, *p;
+struct lista *criaLista(int n) 
+{
+	struct lista *ini, *ult, *head;
 	int i;
 
 	ini = ult = NULL;
 
-	for (i = 0; i < n; i++) {
-		p = (struct lista *)malloc(sizeof(struct lista));
-		p->comp = geraCompetencia(1.0, 10.0);
-		p->idade = geraIdade(18, 60);
-		p->prox = NULL;
+	for (i = 0; i < n; i++) 
+	{
+		head = (struct lista *)malloc(sizeof(struct lista));
+		head->idade = geraIdade(18, 60);
+		head->comp = geraCompetencia(1.0, 10.0);
+		head->prox = NULL;
 		
-		if (ult)
-			ult->prox = p;
-		else
-			ini = p;
+		if (ult) ult->prox = head;
+		else ini = head;
 		
-		ult = p;
+		ult = head;
 	}
 
 	return (ini);
 }
 
-/* Printa idade e competencia */
-void printLista(struct lista *p) {
-	if (!p)
-		return;
-	while (p) {
-		printf("%d %f\n", p->idade, p->comp);
-		p = p->prox;
-	}
-}
-
 /* Conta numero de nos da lista */
-int contaNos(struct lista *p) {
-	struct lista *ptr;
+int contaNos(struct lista *head) 
+{
 	int cont = 0;
-	
-	ptr = p;
-
-	while (ptr) {
+	struct lista *atual = head;
+	while (atual != NULL) 
+	{
 		cont++;
-		ptr = ptr->prox;
+		atual = atual->prox;
 	}
 
 	return cont;
 }
 
 /* Remove funcionarios com competencia < 4.0 ou Idade > 60 */
-void demiteFuncionarios(struct lista *p) {
-	struct lista *ptr, *antes;
+void demiteFuncionarios(struct lista **head) 
+{
 	/* Lista vazia */
-	if (!p)
-		return;
-	else {
-		ptr = p;
-		antes = p;
-		while (ptr) {
-			if (ptr->idade > idade_max || ptr->comp < comp_min) {
-				/* ptr e o primeiro da lista */
-				if (ptr == p) {
-					p = p->prox;
-					antes = p->prox;
-					free(ptr);
-					ptr = antes;
+	if (head == NULL) return;
+
+	struct lista *prev, *atual;
+	atual = *head;
+
+	while (atual != NULL) 
+	{
+		if ((atual->idade > idade_max)
+		 || (atual->comp < comp_min)
+		 || (atual->comp != atual->comp))
+		{
+			/* atual eh o head */
+			if (atual == *head) 
+			{
+				/* a lista possui mais de um no */
+				if(atual->prox)
+				{
+					prev = *head;
+					atual = atual->prox;
+					free(prev);
+					*head = atual;
 				}
-				else {
-					antes->prox = ptr->prox;
-					free(ptr);
-					ptr = antes->prox;
+				else /* a lista possui apenas o head */
+				{
+					*head = NULL;
+					free(atual);
+					*head = (struct lista *)malloc(sizeof(struct lista));
+					*head = NULL;
+					return;
 				}
 			}
-			else {
-				antes = ptr;
-				ptr = ptr->prox;
+			else
+			{
+				/* ptr eh o ultimo */
+				if (atual->prox == NULL)
+				{
+					prev->prox = NULL;
+					free(atual);
+					atual = NULL;
+					return;
+				}
+				else
+				{
+					/* ptr esta no meio da lista */
+					prev->prox = atual->prox;
+					free(atual);
+					atual = prev->prox;
+				}
 			}
 		}
-		return;
-	}
-}
-
-/* Busca melhor funcionario (maior competencia) */
-struct lista *buscaMelhor(struct lista *p) {
-	struct lista *aux, *ptr;
-	float melhor = 0;
-
-	aux = p;
-	melhor = aux->comp;
-
-	while (aux->prox) {
-		aux = aux->prox;
-		if (aux->comp > melhor) {
-			melhor = aux->comp;
-
-			ptr->comp = aux->comp;
-			ptr->idade = aux->idade;
-			ptr->prox = NULL;
+		/* atual nao deve ser excluido, parte para o proximo no */
+		else
+		{
+			prev = atual;
+			atual = atual->prox;
 		}
 	}
-	return ptr;
 }
 
-/* Busca pior funcionario (menor competencia) */
-struct lista *buscaPior(struct lista *p) {
-	struct lista *aux, *ptr;
-	float pior = 10.0;
+/* Remove no (NAO EXCLUI FUNCIONARIO PROMOVIDO DO NIVEL ANTERIOR) */
+void removeNo(struct lista **head, struct lista *ptr) 
+{
+	struct lista *prev, *atual;
 
-	aux = p;
-	pior = aux->comp;
-
-	while (!aux->prox) {
-		aux = aux->prox;
-		if (aux->comp < pior) {
-			pior = aux->comp;
-			
-			ptr->comp = aux->comp;
-			ptr->idade = aux->idade;
-			ptr->prox = NULL;
+	atual = *head;
+	while(atual != NULL)
+	{
+		/* Funciona sem hipotese */
+		if((atual->comp == ptr->comp) && (atual->idade == ptr->idade))
+		// if((&atual == &ptr) && (atual->prox == ptr->prox))
+		// if(atual == ptr)
+		// if(atual->prox == ptr->prox)
+		// if((atual->comp == ptr->comp) && (atual->prox == ptr->prox))
+		{
+			// printf("atual:\t%p\nptr:\t%p\n", atual, ptr);
+			// printf("atual:\t%.2f\nptr:\t%.2f\n", atual->comp, ptr->comp);
+			// printf("atual:\t%d\nptr:\t%d\n", atual->idade, ptr->idade);
+			if(atual == *head)
+			{
+				/* a lista possuia mais de um no */
+				if(atual->prox)
+				{
+					prev = *head;
+					atual = atual->prox;
+					free(prev);
+					*head = atual;
+					return;
+				}
+				/* a lista possui apenas o head */
+				else 
+				{
+					*head = NULL;
+					free(atual);
+					*head = (struct lista *)malloc(sizeof(struct lista));
+					*head = NULL;
+					return;
+				}
+			}
+			else
+			{
+				/* atual e o ultimo */
+				if(atual->prox == NULL)
+				{
+					prev->prox = NULL;
+					free(atual);
+					atual = NULL;
+					return;
+				}
+				/* atual esta no meio da lista */
+				else
+				{
+					prev->prox = atual->prox;
+					free(atual);
+					atual = prev->prox;
+					return;
+				}
+			}
 		}
-	}
 
-	return ptr;
-}
-
-/* Busca funcionario aleatorio */
-struct lista *buscaAleatorio(struct lista *p) {
-	struct lista *ptr;
-	int nos, k, i;
-
-	nos = contaNos(p);
-	k = randomInt(0, nos);
-
-	ptr = p;
-	if(k == 1) {
-		ptr->prox = NULL;
-		return ptr;
-	}
-
-	for(i = 0; i < k; i++) ptr = ptr->prox;
-
-	ptr->prox = NULL;
-
-	return ptr;
-}
-
-/* Remove no */
-void removeNo(struct lista *p, struct lista *ptr) {
-	struct lista *aux, *antes;
-
-	antes = p;
-	aux = p;
-	
-	while(aux) {
-		if(aux == ptr) {
-			antes->prox = ptr->prox;
-			free(ptr);
-			return;
-		}
-		antes = aux;
-		aux = aux->prox;
+		prev = atual;
+		atual = atual->prox;
 	}
 }
 
 /* Insere novo funcionario no final da lista */
-void contrataFuncionario(struct lista *p) {
-	struct lista *ptr, *aux;
+void contrataFuncionario(struct lista *head) 
+{
+	struct lista *ptr, *atual;
 
 	ptr = (struct lista *)malloc(sizeof(struct lista));
 
@@ -182,111 +185,237 @@ void contrataFuncionario(struct lista *p) {
 	ptr->prox = NULL;
 
 	/* Lista vazia */
-	if(!p) {
-		p = ptr;
+	if(head == NULL) 
+	{
+		head = ptr;
 		return;
 	}
-	else {
-		aux = p;
 
-		while(!aux->prox)
-			aux = aux->prox;
-		
-		aux->prox = ptr;
-	}
+	atual = head;
+	while(atual->prox != NULL) atual = atual->prox;
+	
+	atual->prox = ptr;
 }
 
 /* Insere funcionario existente no final da lista */
-void insereExistente(struct lista *p, struct lista *ptr) {
-	struct lista *aux;
-
+void insereExistente(struct lista *ptr, struct lista *head) 
+{
 	/* Lista vazia */
-	if(!p) { 
-		p = ptr;
+	if(head == NULL) 
+	{
+		printf("\nlista vazia\n");
+		head = ptr;
 		return;
 	}
-	else {
-		aux = p;
 
-		while(aux->prox)
-			aux = aux->prox;
-		
-		aux->prox = ptr;
-		return;
-	}
+	struct lista *atual;
+	atual = head;
+	while(atual->prox) atual = atual->prox;
+	atual->prox = ptr;
 }
 
-/* Promove funcionario com maior competencia */
-void promoveMelhor(struct lista *alto, struct lista *baixo, int nos) {
-	struct lista *ptr;
+/* Busca melhor funcionario (maior competencia) */
+struct lista *buscaMelhor(struct lista *head) 
+{
+	struct lista *atual, *ptr;
+	float melhor;
 
-	while(contaNos(alto) < nos) {
-		ptr = buscaMelhor(baixo);
-		#ifdef PETER
-			/* Altera competencia segundo o principio de Peter */
-			ptr->comp = geraCompetencia(1.0, 10.0);
-		#else
-			#ifdef COMMONSENSE
-				/* Altera competencia segundo o senso comum */
-				ptr->comp = ptr->comp * delta();
-			#endif // COMMONSENSE
-		#endif //PETER
+	atual = head;
+	melhor = atual->comp;
 
-		insereExistente(ptr, alto);
-		removeNo(ptr, baixo);
+	ptr = (struct lista *)malloc(sizeof(struct lista));
+
+	while (atual->prox) 
+	{
+		atual = atual->prox;
+		if (atual->comp > melhor) 
+		{
+			melhor = atual->comp;
+
+			ptr->comp = atual->comp;
+			ptr->idade = atual->idade;
+			ptr->prox = NULL;
+		}
 	}
+
+	// printNode(ptr);
+
+	return ptr;
 }
 
-/* Promove funcionario com pior competencia */
-void promovePior(struct lista *alto, struct lista *baixo, int nos) {
-	struct lista *ptr;
+/* Busca pior funcionario (menor competencia) */
+struct lista *buscaPior(struct lista *head) 
+{
+	struct lista *atual, *ptr;
+	float pior;
 
-	while(contaNos(alto) < nos) {
-		ptr = buscaPior(baixo);
-		#ifdef PETER
-			/* Altera competencia segundo o principio de Peter */
-			ptr->comp = geraCompetencia(1.0, 10.0);
-		#else
-			#ifdef COMMONSENSE
-				/* Altera competencia segundo o senso comum */
-				ptr->comp = ptr->comp * delta();
-			#endif // COMMONSENSE
-		#endif //PETER
+	atual = head;
+	pior = atual->comp;
 
-		insereExistente(alto, ptr);
-		removeNo(baixo, ptr);
-	}
-}
-
-/* Promove funcionario aleatorio */
-void promoveAleatorio(struct lista *alto, struct lista *baixo, int nos) {
-	struct lista *ptr;
+	ptr = (struct lista *)malloc(sizeof(struct lista));
 	
-	while(contaNos(alto) < nos) {
-		ptr = buscaAleatorio(baixo);
-		#ifdef PETER
-			/* Altera competencia segundo o principio de Peter */
-			ptr->comp = geraCompetencia(1.0, 10.0);
-		#else
-			#ifdef COMMONSENSE
-				/* Altera competencia segundo o senso comum */
-				ptr->comp = ptr->comp * delta();
-			#endif // COMMONSENSE
-		#endif //PETER
+	while (atual->prox) 
+	{
+		atual = atual->prox;
+		if (atual->comp < pior) 
+		{
+			pior = atual->comp;
+			
+			ptr->comp = atual->comp;
+			ptr->idade = atual->idade;
+			ptr->prox = NULL;
+		}
+	}
 
-		insereExistente(alto, ptr);
-		removeNo(baixo, ptr);
+	// printNode(ptr);
+
+	return ptr;
+}
+
+/* Busca funcionario aleatorio */
+struct lista *buscaAleatorio(struct lista *head) 
+{
+	struct lista *ptr, *prev;
+	int nos, k, i = 0;
+
+	nos = contaNos(head);
+	k = randomInt(0, nos);
+
+	ptr = (struct lista *)malloc(sizeof(struct lista));
+
+	ptr = prev = head;
+
+	if(k == 0) 
+	{
+		ptr->prox = NULL;
+		return ptr;
+	}
+
+	while (ptr->prox && i < k)
+	{
+		prev = ptr;
+		ptr = ptr->prox;
+		i++;
+	}
+
+	ptr->prox = NULL;
+
+	// printNode(ptr);
+
+	return ptr;
+}
+
+/* Altera competencia do funcionario*/
+void alteraCompetencia(struct lista *ptr)
+{
+	float tmp;
+
+	/* altera (ou nao) a competencia do funcionario */
+	#ifdef PETER
+		/* Altera competencia segundo o principio de Peter */
+		tmp = geraCompetencia(1.0, 10.0);
+		ptr->comp = tmp;
+	#else
+		#ifdef COMMONSENSE
+			/* Altera competencia segundo o senso comum */
+			do
+			{
+				tmp = ptr->comp * randomFloat(0.9, 1.1);
+			} while (tmp > 10.0);
+			ptr->comp = tmp;
+		#endif // COMMONSENSE
+	#endif // PETER
+
+	return;
+}
+
+/* Promove funcionario */
+void promoveFuncionario(struct lista **origem, struct lista **destino, int nos)
+{
+	float tmp;
+	while(contaNos(*destino) < nos) 
+	{
+		struct lista *ptr;
+		/* busca o funcionario */
+		#ifdef MELHOR
+			ptr = buscaMelhor(*origem);
+			#else
+				#ifdef PIOR
+					ptr = buscaPior(*origem);
+					#else
+						#ifdef ALEATORIO
+							ptr = buscaAleatorio(*origem);
+						#endif // ALEATORIO
+				#endif // PIOR
+		#endif // MELHOR
+
+		// printNode(ptr);
+
+		if(nos == n_1) *destino = ptr;
+		else insereExistente(ptr, *destino);
+		
+		removeNo(origem, ptr);
+
+		alteraCompetencia(ptr);
 	}
 }
 
 /* Envelhece todos os funcionarios de um nivel */
-void envelheceFuncionarios(struct lista *p) {
-	struct lista *ptr;
+void envelheceFuncionarios(struct lista *head) 
+{
+	struct lista *atual = head;
 	
-	ptr = p;
-	
-	while(ptr) {
-		ptr->idade++;
-		ptr = ptr->prox;
+	while(atual != NULL) 
+	{
+		atual->idade++;
+		atual = atual->prox;
 	}
+}
+
+/* Printa node com idade e competencia */
+void printNode(struct lista *ptr)
+{
+	printf("\n O funcionario possui idade e competencia | %d %.2f |\n", ptr->idade, ptr->comp);
+}
+
+/* Printa lista inteira com idade e competencia */
+void printLista(struct lista *head) 
+{
+	if (head == NULL) return;
+	while (head) 
+	{
+		printf("%d %.2f | ", head->idade, head->comp);
+		head = head->prox;
+	}
+}
+
+/* Imprime teste */
+void printTeste(struct lista *n1, struct lista *n2, struct lista *n3, struct lista *n4, struct lista *n5, struct lista *n6)
+{
+	printf("\nNivel 1, # de nos: %d/%d\n", contaNos(n1), n_1);
+	if(n1 != NULL) {
+		// printf("Nivel 1 nao esta vazio!\n");
+		// printLista(n1);
+	}
+	/*
+	else
+	{
+		printf("Nivel 1 esta vazio!");
+	}
+	*/
+
+	printf("\n\nNivel 2, # de nos: %d/%d\n", contaNos(n2), n_2);
+	// printLista(n2);
+
+	printf("\n\nNivel 3, # de nos: %d/%d\n", contaNos(n3), n_3);
+	// printLista(n3);
+
+	printf("\n\nNivel 4, # de nos: %d/%d\n", contaNos(n4), n_4);
+	// printLista(n4);
+
+	printf("\n\nNivel 5, # de nos: %d/%d\n", contaNos(n5), n_5);
+	// printLista(n5);
+
+	printf("\n\nNivel 6, # de nos: %d/%d\n", contaNos(n6), n_6);
+	// printLista(n6);
 }

@@ -17,12 +17,21 @@
 #define n_5 41
 #define n_6 81
 
-/* Tempo maximo da Simulação */
-#define TMAX 1
+/* Tempo maximo da Simulacao */
+#define TMAX 60
 
 /* Idade e Competencia de corte */
 #define idade_max 60
-#define comp_min 5.0
+#define comp_min 4.0
+
+/* Define estrategias de promocao */
+#define MELHOR
+// #define PIOR
+// #define ALEATORIO
+
+/* Define hipoteses */
+#define PETER
+// #define COMMONSENSE
 
 /* Struct com idade e competencia */
 struct lista {
@@ -31,29 +40,22 @@ struct lista {
 	struct lista *prox;
 };
 
-/* Define estrategias de promocao */
-#define MELHOR
-//#define PIOR
-//#define ALEATORIO
-
-/* Define hipoteses */
-#define PETER
-//#define COMMONSENSE
-
+/* Externs */
 
 extern struct lista *criaLista(int n);
-extern void printLista(struct lista *p);
-extern int contaNos(struct lista *p);
-extern void demiteFuncionarios(struct lista *p);
-extern struct lista *buscaMelhor(struct lista *p);
-extern struct lista *buscaPior(struct lista *p);
-extern struct lista *buscaAleatorio(struct lista *p);
-extern void removeNo(struct lista *p, struct lista *ptr);
-extern void contrataFuncionario(struct lista *p);
-extern void insereExistente(struct lista *p, struct lista *ptr);
-extern void promoveMelhor(struct lista *alto, struct lista *baixo, int nos);
-extern void promovePior(struct lista *alto, struct lista *baixo, int nos);
-extern void promoveAleatorio(struct lista *alto, struct lista *baixo, int nos);
-extern void envelheceFuncionarios(struct lista *p);
+extern int contaNos(struct lista *head);
+extern void demiteFuncionarios(struct lista **head);
+extern void removeNo(struct lista **head, struct lista *ptr);
+extern void contrataFuncionario(struct lista *head);
+extern void insereExistente(struct lista *head, struct lista *ptr);
+extern struct lista *buscaMelhor(struct lista *head);
+extern struct lista *buscaPior(struct lista *head);
+extern struct lista *buscaAleatorio(struct lista *head);
+extern void alteraCompetencia(struct lista *ptr);
+extern void promoveFuncionario(struct lista **origem, struct lista **destino, int nos);
+extern void envelheceFuncionarios(struct lista *head);
+extern void printNode(struct lista *ptr);
+extern void printLista(struct lista *head);
+extern void printTeste(struct lista *n1, struct lista *n2, struct lista *n3, struct lista *n4, struct lista *n5, struct lista *n6);
 
 #endif // peter_h__

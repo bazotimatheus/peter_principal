@@ -28,4 +28,4 @@ peter: $(OBJS)
 .PHONY: clean
 
 clean:
-	$(RM) $(OBJS) peter *~ saida.out
+	$(RM) $(OBJS) peter *~ *.out
